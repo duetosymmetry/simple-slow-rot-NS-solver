@@ -1,17 +1,16 @@
 IDIR = .
+CC=clang
 CXX=clang++
-CC=$(CXX)
 LD=clang++
-CFLAGS=-I$(IDIR) $(shell gsl-config --cflags) -O3 \
-  -Wall -Wno-narrowing -std=c++1z
+BASEFLAGS=-I$(IDIR) $(shell gsl-config --cflags) -O3 \
+  -Wall -Wno-narrowing
 # if debugging, comment out this line:
-CFLAGS += -DNOASSERT
-CXXFLAGS=$(CFLAGS)
+BASEFLAGS += -DNOASSERT
 
-LDFLAGS=-lm $(shell gsl-config --libs)
+CFLAGS   = $(BASEFLAGS) -std=c11
+CXXFLAGS = $(BASEFLAGS) -std=c++1z
 
-_DEPS = parameters.h declaration.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
+LDFLAGS  = -lm $(shell gsl-config --libs)
 
 # this should contain all C and C++ source files
 SRCS = ppEOS.cpp testppEOS.cpp testppEOS_eps_of_P.cpp                  \
@@ -35,30 +34,33 @@ all: $(TARGETS)
 %-cmdline.c %-cmdline.h: %.ggo
 	gengetopt < $<
 
+# How to link/compile
+$(TARGETS):
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+# dependancies
 testppEOS: testppEOS.o ppEOS.o ppEOSTable.o testppEOS-cmdline.o
+
 testppEOS_eps_of_P: testppEOS_eps_of_P.o ppEOS.o
+
 testppEOS_get_rho_low_high: testppEOS_get_rho_low_high.o ppEOS.o
 
 backgroundModelTest: backgroundModelTest.o                           \
                      backgroundModelTest-cmdline.o BackgroundModel.o \
                      writeModels.o ppEOS.o ppEOSTable.o              \
                      ModelO1.o ModelO2.o
-	$(LD) -o $@ $^ $(LDFLAGS)
 
 testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
                     BackgroundModel.o ModelO1.o writeModels.o        \
                     ppEOS.o ppEOSTable.o ModelO2.o
-	$(LD) -o $@ $^ $(LDFLAGS)
 
 testModelO1-multi: testModelO1-multi.o testModelO1-multi-cmdline.o \
                    BackgroundModel.o ModelO1.o writeModels.o       \
                    ppEOS.o ppEOSTable.o ModelO2.o
-	$(LD) -o $@ $^ $(LDFLAGS)
 
 runModelO2-multi: runModelO2-multi.o runModelO2-multi-cmdline.o     \
                   BackgroundModel.o ModelO1.o writeModels.o ppEOS.o \
                   ppEOSTable.o ModelO2.o util.o
-	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -f *.o *~ core $(INCDIR)/*~ $(TARGETS)
@@ -81,7 +83,7 @@ depend:
 
 $(DEPFILE):
 	@echo $(DEPTOKEN) > $(DEPFILE)
-	makedepend $(DEPFLAGS) -- $(CFLAGS) -- $(SRCS) >&/dev/null
+	makedepend $(DEPFLAGS) -- $(BASEFLAGS) -- $(SRCS) >&/dev/null
 
 # put this file in the last line of your Makefile
 sinclude $(DEPFILE)
