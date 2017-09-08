@@ -13,12 +13,16 @@ CXXFLAGS = $(BASEFLAGS) -std=c++1z
 LDFLAGS  = -lm $(shell gsl-config --libs)
 
 # this should contain all C and C++ source files
-SRCS = ppEOS.cpp testppEOS.cpp testppEOS_eps_of_P.cpp                  \
-  testppEOS_get_rho_low_high.cpp ppEOSTable.cpp BackgroundModel.cpp    \
-  backgroundModelTest-cmdline.c testppEOS-cmdline.c                    \
-  testModelO1-single-cmdline.c testModelO1-multi-cmdline.c ModelO1.cpp \
-  testModelO1-single.cpp testModelO1-multi.cpp ModelO2.cpp             \
-  runModelO2-multi-cmdline.c runModelO2-multi.cpp util.cpp
+SRCS = ppEOS.cpp ppEOSTable.cpp util.cpp \
+  testppEOS_eps_of_P.cpp testppEOS_get_rho_low_high.cpp \
+  testppEOS.cpp testppEOS-cmdline.c \
+  BackgroundModel.cpp \
+  backgroundModelTest.cpp backgroundModelTest-cmdline.c \
+  ModelO1.cpp \
+  testModelO1-single.cpp testModelO1-single-cmdline.c \
+  testModelO1-multi.cpp testModelO1-multi-cmdline.c \
+  writeModels.cpp ModelO2.cpp \
+  runModelO2-multi-cmdline.c runModelO2-multi.cpp
 
 TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
   backgroundModelTest testModelO1-single testModelO1-multi        \
