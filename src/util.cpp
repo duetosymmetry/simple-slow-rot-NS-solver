@@ -7,10 +7,10 @@
  *
  */
 
-#include "util.h"
-#include "BackgroundModel.h"
-#include "ModelO1.h"
-#include "ModelO2.h"
+#include "util.hpp"
+#include "BackgroundModel.hpp"
+#include "ModelO1.hpp"
+#include "ModelO2.hpp"
 #include <gsl/gsl_spline.h>
 #include <vector>
 #include <algorithm>

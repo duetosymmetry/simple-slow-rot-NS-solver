@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "ppEOS.h"
+#include "ppEOS.hpp"
 #include <string>
 #include <vector>
 #include <memory>

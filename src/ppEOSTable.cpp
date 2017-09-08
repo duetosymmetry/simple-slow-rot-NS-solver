@@ -11,7 +11,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include "ppEOSTable.h"
+#include "ppEOSTable.hpp"
 
 struct ppEOSTableEntry
 {

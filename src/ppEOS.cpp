@@ -25,12 +25,12 @@
  *
  */
 
-#include "ppEOS.h"
+#include "ppEOS.hpp"
 #include <cmath>
 #include <string>
 #include <sstream>
 
-#include "constants.h" /* for G and c */
+#include "constants.hpp" /* for G and c */
 
 // Eq. (1)
 double ppEOS::pressure( double rho ) const

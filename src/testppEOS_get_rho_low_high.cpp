@@ -1,4 +1,4 @@
-#include "ppEOS.h"
+#include "ppEOS.hpp"
 #include <cmath>
 #include <iostream>
 #include <cstdlib>

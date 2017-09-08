@@ -1,5 +1,5 @@
-#include "ppEOS.h"
-#include "ppEOSTable.h"
+#include "ppEOS.hpp"
+#include "ppEOSTable.hpp"
 #include <cmath>
 #include <iostream>
 #include <fstream>

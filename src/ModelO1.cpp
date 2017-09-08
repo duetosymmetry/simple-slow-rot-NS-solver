@@ -7,7 +7,7 @@
  *
  */
 
-#include "ModelO1.h"
+#include "ModelO1.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -19,7 +19,7 @@
 
 // for integration magic numbers:
 // BG_MAX_SIZE, EPSR, DR, EPSABS, EPSREL, P_RATIO
-#include "integMagicNums.h"
+#include "integMagicNums.hpp"
 
 //////////////////////////////////////////////////////////////////////
 // Forward decls

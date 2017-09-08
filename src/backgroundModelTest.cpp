@@ -7,10 +7,10 @@
  *
  */
 
-#include "constants.h" /* for G and c */
-#include "ppEOSTable.h"
-#include "BackgroundModel.h"
-#include "writeModels.h"
+#include "constants.hpp" /* for G and c */
+#include "ppEOSTable.hpp"
+#include "BackgroundModel.hpp"
+#include "writeModels.hpp"
 #include <cmath>
 #include <iostream>
 

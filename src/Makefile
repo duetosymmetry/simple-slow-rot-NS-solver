@@ -14,12 +14,12 @@ _DEPS = parameters.h declaration.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # this should contain all C and C++ source files
-SRCS = ppEOS.cc testppEOS.cc testppEOS_eps_of_P.cc                    \
-  testppEOS_get_rho_low_high.cc ppEOSTable.cc BackgroundModel.cc      \
-  backgroundModelTest-cmdline.c testppEOS-cmdline.c                   \
-  testModelO1-single-cmdline.c testModelO1-multi-cmdline.c ModelO1.cc \
-  testModelO1-single.cc testModelO1-multi.cc ModelO2.cc               \
-  runModelO2-multi-cmdline.c runModelO2-multi.cc util.cc
+SRCS = ppEOS.cpp testppEOS.cpp testppEOS_eps_of_P.cpp                  \
+  testppEOS_get_rho_low_high.cpp ppEOSTable.cpp BackgroundModel.cpp    \
+  backgroundModelTest-cmdline.c testppEOS-cmdline.c                    \
+  testModelO1-single-cmdline.c testModelO1-multi-cmdline.c ModelO1.cpp \
+  testModelO1-single.cpp testModelO1-multi.cpp ModelO2.cpp             \
+  runModelO2-multi-cmdline.c runModelO2-multi.cpp util.cpp
 
 TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
   backgroundModelTest testModelO1-single testModelO1-multi        \

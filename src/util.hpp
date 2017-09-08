@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "BackgroundModel.h"
-#include "ModelO1.h"
-#include "ModelO2.h"
+#include "BackgroundModel.hpp"
+#include "ModelO1.hpp"
+#include "ModelO2.hpp"
 
 #include <gsl/gsl_spline.h>
 

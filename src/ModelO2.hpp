@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "BackgroundModel.h"
-#include "ModelO1.h"
+#include "BackgroundModel.hpp"
+#include "ModelO1.hpp"
 #include <string>
 #include <vector>
 #include <memory>

@@ -11,6 +11,6 @@
 #pragma once
 
 #include <string>
-#include "ppEOS.h"
+#include "ppEOS.hpp"
 
 ppEOS findEOS(const std::string &name);

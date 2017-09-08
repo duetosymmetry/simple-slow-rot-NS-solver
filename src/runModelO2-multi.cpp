@@ -7,13 +7,13 @@
  *
  */
 
-#include "constants.h" /* for G and c */
-#include "ppEOSTable.h"
-#include "BackgroundModel.h"
-#include "ModelO1.h"
-#include "ModelO2.h"
-#include "writeModels.h"
-#include "util.h"
+#include "constants.hpp" /* for G and c */
+#include "ppEOSTable.hpp"
+#include "BackgroundModel.hpp"
+#include "ModelO1.hpp"
+#include "ModelO2.hpp"
+#include "writeModels.hpp"
+#include "util.hpp"
 #include <vector>
 #include <gsl/gsl_spline.h>
 #include <cmath>

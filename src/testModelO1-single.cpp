@@ -1,28 +1,31 @@
 /*
- * testModelO1-multi.cc
+ * testModelO1-single.cc
  * Author: Leo C. Stein (leo.stein@gmail.com)
- * Date: 2014 Feb
+ * Date: 2014 Jan
  *
- * This program run multiple ModelO1 models
+ * This program runs a single ModelO1 in order to test said class.
  *
  */
 
-#include "constants.h" /* for G and c */
-#include "ppEOSTable.h"
-#include "BackgroundModel.h"
-#include "ModelO1.h"
-#include "writeModels.h"
+#include "constants.hpp" /* for G and c */
+#include "ppEOSTable.hpp"
+#include "BackgroundModel.hpp"
+#include "ModelO1.hpp"
+#include "writeModels.hpp"
 #include <cmath>
 #include <iostream>
 #include <fstream>
 
-#include "testModelO1-multi-cmdline.h"
+#include "testModelO1-single-cmdline.h"
 
 int parseCmdlineConfigInto(struct gengetopt_args_info *args_info,
-                           int argc, char *argv[]);
+			   int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
+
+  ppEOS EoS = findEOS("SLy");
+  double pc;
 
   // Useful logging
   std::cerr << "This is " __FILE__ ", compiled on " __DATE__ << std::endl;
@@ -45,75 +48,46 @@ int main(int argc, char *argv[])
   ////////////////////////////////////////////////////////////
   // Put command line parameters into EoS, pc, etc.
 
-  ppEOS EoS = findEOS("SLy");
-
   if (args_info.eos_name_given) {
     EoS = findEOS(args_info.eos_name_arg);
   } else {
     EoS = ppEOS( pow(10., args_info.log10p1_arg),
-     args_info.Gamma1_arg,
-     args_info.Gamma2_arg,
-     args_info.Gamma3_arg );
+		 args_info.Gamma1_arg,
+		 args_info.Gamma2_arg,
+		 args_info.Gamma3_arg );
   };
 
-  const int num = args_info.num_arg;
-
-  if (num < 2)
-  {
-    std::cerr << "ERROR: num *must* be at least two!" << std::endl;
-    return 1;
-  };
-
-  // These come in as dyne/cm^2, convert them to geometric units
-  const double pc_low  = args_info.pc_low_arg  * G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
-  const double pc_high = args_info.pc_high_arg * G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
-
-  // This will be log spaced
-  const double log10_pc_low  = log10(pc_low);
-  const double log10_pc_high = log10(pc_high);
-  const double delta = (log10_pc_high-log10_pc_low)/(num-1);
-
-  // summary file
-  std::ofstream o(args_info.out_arg);
-
-  std::cerr << "Writing to file " << args_info.out_arg << std::endl;
-
-  writeSummaryHeader1( o );
+  // And into pc
+  // This starts out in dyne/cm^2
+  pc = args_info.pc_arg;
+  // Convert to geometric units
+  pc *= G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
 
   ////////////////////////////////////////////////////////////
-  // Main variables
-  double pc =  pc_low;
+  // Create the bg model and solve
   BackgroundModel model0( EoS, pc );
+
+  std::cerr << "Solving background model" << std::endl;
+
+  model0.solve();
+
+  std::cerr << "Writing background model to file " << args_info.out_0_arg << std::endl;
+
+  // Can now write bg model to file
+  writeBackgroundModel( args_info.out_0_arg, model0 );
+
+  ////////////////////////////////////////////////////////////
+  // Creat the O(a^1) model and solve
   ModelO1 model1( model0 );
 
-  for ( unsigned int i=0; i < num; i++ )
-  {
-    pc = pow( 10., log10_pc_low + i*delta );
+  std::cerr << "Solving model at O(a^1)" << std::endl;
 
-    //////////////////////////////
-    // Background model
-    // This also has the side effect of resetting model0
-    model0.setpc( pc );
+  model1.solve();
 
-    std::cerr << "Model #" << i+1 << "/" << num << ", pc=" << pc << " ... ";
+  std::cerr << "Writing model at O(a^1) to file " << args_info.out_1_arg << std::endl;
 
-    model0.solve();
-
-    //////////////////////////////
-    // O(1) model
-    model1.reset();
-    std::cerr << "solving at O(a^1) ... ";
-
-    model1.solve();
-
-    std::cerr << "writing summary line." << std::endl;
-
-    writeSummaryLine( o, model0, model1 );
-
-  };
-
-
-  o.close();
+  // Can now write bg model to file
+  writeModelO1( args_info.out_1_arg, model1 );
 
   // Exit cleanly
   cmdline_parser_free(&args_info);
@@ -124,7 +98,7 @@ int main(int argc, char *argv[])
 // Command line and config file parsing
 //////////////////////////////////////////////////////////////////////
 int parseCmdlineConfigInto(struct gengetopt_args_info *args_info,
-                           int argc, char *argv[])
+			    int argc, char *argv[])
 {
   int result = 0;
 
