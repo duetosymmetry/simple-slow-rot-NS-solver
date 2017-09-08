@@ -1,0 +1,74 @@
+# This ignore file is from https://github.com/github/gitignore
+# Please go to the end of the file to add any extra ignores
+
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Please put any extra ignores below this line
+
+# LCS: adding executable targets
+testppEOS
+testppEOS_eps_of_P
+testppEOS_get_rho_low_high
+backgroundModelTest
+testModelO1-single
+testModelO1-multi
+runModelO2-multi
+
+# LCS: your local .depends may differ from mine
+.depends
+
+# LCS: .bak is used as a backup extension by makedepends
+*.bak
+
+# LCS: Ignore .dat files unless forcing
+*.dat

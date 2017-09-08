@@ -1,0 +1,42 @@
+#
+# testModelO1-multi.ggo
+#
+# The configuration file for command-line options for testModelO1-multi
+#
+# Author: Leo C. Stein (leo.stein@gmail.com)
+# Date:   Feb. 2014
+#
+
+# Meta
+package "testModelO1-multi"
+version "0.1"
+description "Run a multiple stellar models at O(a^1)"
+
+# Optional - arguments to pass to gengetopt
+args "--file-name=testModelO1-multi-cmdline -C"
+
+section "Configuration file"
+
+option "conf-file"   C "Configuration file to read" string default="modelO1-multi.conf" optional
+
+section "Model parameter space"
+
+option "pc-low"     l "Smallest central pressure [dyne/cm^2]" double default="4.e+34" required
+option "pc-high"    h "Largest  central pressure [dyne/cm^2]" double default="2.e+36" required
+option "num"        n "Number of models to run (>=2, pressure is log-spaced)" int default="32" optional
+
+section "Equation of state"
+
+defmode "param-fit"    modedesc="Parametrized EoS fit to a numerical model (default)."
+defmode "param-manual" modedesc="Parametrized EoS with manual parameters."
+
+modeoption "eos-name" - "Name of the EoS model." string default="SLy" values="PAL6","SLy","AP1","AP2","AP3","AP4","FPS","WFF1","WFF2","WFF3","BBB2","BPAL12","ENG","MPA1","MS1","MS2","MS1b","PS","GS1","GS2","BGN1H1","GNH3","H1","H2","H3","H4","H5","H6","H7","PCL2","ALF1","ALF2","ALF3","ALF4" mode="param-fit" optional
+
+modeoption "log10p1"  p "The log (base 10) of (p1 in dyne/cm^2)." double default="34.384" mode="param-manual" required
+modeoption "Gamma1"   1 "Power law index Gamma1" double default="3.005" mode="param-manual" required
+modeoption "Gamma2"   2 "Power law index Gamma2" double default="2.988" mode="param-manual" required
+modeoption "Gamma3"   3 "Power law index Gamma3" double default="2.851" mode="param-manual" required
+
+section "File output"
+
+option "out"  o "The file name to output the multiple model summary" string default="summary1.dat" optional

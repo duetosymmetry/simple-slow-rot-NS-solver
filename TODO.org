@@ -1,0 +1,10 @@
+* Use SpEC's InfoAtLink approach
+* Check for fencepost errors
+* Get rid of BG_MAX_SIZE restriction?
+* Maybe use [[https://github.com/jarro2783/cxxopts][cxxopts]] for parsing command line?
+** But then we won't be able to use config files
+* Maybe use [[https://github.com/awsteiner/o2scl][o2scl]] wrapper around GSL?
+* Create an abstract base class for EOS, which ppEOS extends.
+* Better documentation
+* Include a `test` rule in Makefile
+** Move tests into separate dir
