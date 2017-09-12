@@ -1,3 +1,8 @@
+[//]: # (Distributed under the MIT License.)
+[//]: # (See LICENSE for details.)
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
+
 # Simple slow-rotation neutron star structure solver
 This started out as Kent's code for
 [1303.1528](https://arxiv.org/abs/1303.1528), and was initially Nico's
