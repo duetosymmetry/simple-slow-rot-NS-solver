@@ -11,6 +11,7 @@
 #pragma once
 
 #include "ppEOS.hpp"
+#include "Conformal.hpp"
 #include <string>
 #include <vector>
 #include <memory>
@@ -21,7 +22,9 @@ class BackgroundModel {
  public:
 
   /* takes pc in units of cm^-2 */
-  BackgroundModel( const ppEOS &eos, double pc );
+  BackgroundModel( const ppEOS &eos,
+                   const Conformal &conf,
+                   double pc, double phic);
 
   ~BackgroundModel();
 
@@ -38,11 +41,12 @@ class BackgroundModel {
   // Access to interpolants
 
   /* m (in cm^1) as a function of radius (in cm) */
-  double mOfr    ( double R_cm );
+  double muOfr   ( double R_cm );
   /* nu (in cm^0) as a function of radius (in cm) */
   double nuOfr   ( double R_cm );
   /* pressure (in cm^-2) as a function of radius (in cm) */
   double pOfr    ( double R_cm );
+
   /* rho (in cm^-2) as a function of radius (in cm) */
   double rhoOfr  ( double R_cm );
   /* dnudR (in cm^-1) as a function of radius (in cm) */
@@ -54,10 +58,12 @@ class BackgroundModel {
   // i.e. the solutions are indexed with 0 <= i <= iMax().
   long   iMax() const { return i_max; };
 
-  double r ( unsigned long i ) const { return _r [i]; };
-  double m ( unsigned long i ) const { return _m [i]; };
-  double nu( unsigned long i ) const { return _nu[i]; };
-  double p ( unsigned long i ) const { return _p [i]; };
+  double r  ( unsigned long i ) const { return _r  [i]; };
+  double mu ( unsigned long i ) const { return _mu [i]; };
+  double nu ( unsigned long i ) const { return _nu [i]; };
+  double phi( unsigned long i ) const { return _phi[i]; };
+  double psi( unsigned long i ) const { return _psi[i]; };
+  double p  ( unsigned long i ) const { return _p  [i]; };
 
   // Derived quantities
   // The stellar radius (in cm)
@@ -68,6 +74,7 @@ class BackgroundModel {
   // This is public ... it's const so it'll never get modified anyway
 
   const ppEOS &eos;
+  const Conformal &conf;
 
   // Access to raw data. I will return this as const but
   // the caller may not respect the constness ... :(
@@ -86,27 +93,34 @@ protected:
   void buildSplines();
 
   // Calculates initial conditions and stores them in
-  // the [0] elements of _r, _m, _nu, _p
+  // the [0] elements of _r, _mu, _nu, _phi, _psi, _p
   void initialConditions();
 
-  // Storage
+  //// Storage
 
+  // Parameters
   /* pc is in units of cm^-2 */
   double pc;
+  double phic;
 
+  // State
   bool solved, splineBuilt;
 
   long i_max;
 
   std::vector<double>
     _r,
-    _m,
+    _mu,
     _nu,
+    _phi,
+    _psi,
     _p;
 
   gsl_spline 
-    *spline_m,
+    *spline_mu,
     *spline_nu,
+    *spline_phi,
+    *spline_psi,
     *spline_p;
 
   std::unique_ptr<gsl_interp_accel, decltype(&gsl_interp_accel_free)>

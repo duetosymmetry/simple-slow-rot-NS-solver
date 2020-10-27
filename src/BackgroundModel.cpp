@@ -33,10 +33,16 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params);
 // Class member functions
 //////////////////////////////////////////////////////////////////////
 
-BackgroundModel::BackgroundModel( const ppEOS &eos, double pc )
-  : eos(eos), pc(pc), solved(false), splineBuilt(false), i_max(0),
-    _r(BG_MAX_SIZE), _m(BG_MAX_SIZE), _nu(BG_MAX_SIZE), _p(BG_MAX_SIZE),
-    spline_m(nullptr), spline_nu(nullptr), spline_p(nullptr),
+BackgroundModel::BackgroundModel( const ppEOS &eos,
+                                  const Conformal &conf,
+                                  double pc, double phic)
+  : eos(eos), conf(conf),
+    pc(pc), phic(phic),
+    solved(false), splineBuilt(false), i_max(0),
+    _r(BG_MAX_SIZE), _mu(BG_MAX_SIZE), _nu(BG_MAX_SIZE),
+    _phi(BG_MAX_SIZE), _psi(BG_MAX_SIZE), _p(BG_MAX_SIZE),
+    spline_mu(nullptr), spline_nu(nullptr),
+    spline_phi(nullptr), spline_psi(nullptr), spline_p(nullptr),
     acc(gsl_interp_accel_alloc(), &gsl_interp_accel_free)
 {
 };
@@ -70,11 +76,15 @@ void BackgroundModel::safeDeallocSplines()
 {  
 
   if (spline_p)
-    { gsl_spline_free(spline_p);  spline_p=nullptr; };
+    { gsl_spline_free(spline_p);   spline_p=nullptr; };
+  if (spline_psi)
+    { gsl_spline_free(spline_psi); spline_psi=nullptr; };
+  if (spline_phi)
+    { gsl_spline_free(spline_phi); spline_phi=nullptr; };
   if (spline_nu)
-    { gsl_spline_free(spline_nu); spline_nu=nullptr; };
-  if (spline_m)
-    { gsl_spline_free(spline_m);  spline_m=nullptr; };
+    { gsl_spline_free(spline_nu);  spline_nu=nullptr; };
+  if (spline_mu)
+    { gsl_spline_free(spline_mu);  spline_mu=nullptr; };
 
 };
 
@@ -94,13 +104,17 @@ void BackgroundModel::buildSplines()
 
   safeDeallocSplines();
 
-  spline_m   = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
+  spline_mu  = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
   spline_nu  = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
+  spline_phi = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
+  spline_psi = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
   spline_p   = gsl_spline_alloc(gsl_interp_cspline, i_max+1);
 
-  gsl_spline_init (spline_m  , _r.data(), _m.data(),  i_max+1);
-  gsl_spline_init (spline_nu , _r.data(), _nu.data(), i_max+1);
-  gsl_spline_init (spline_p  , _r.data(), _p.data(),  i_max+1);
+  gsl_spline_init (spline_mu , _r.data(), _mu.data(),  i_max+1);
+  gsl_spline_init (spline_nu , _r.data(), _nu.data(),  i_max+1);
+  gsl_spline_init (spline_phi, _r.data(), _phi.data(), i_max+1);
+  gsl_spline_init (spline_psi, _r.data(), _psi.data(), i_max+1);
+  gsl_spline_init (spline_p  , _r.data(), _p.data(),   i_max+1);
 
   resetAccel();
 
@@ -124,12 +138,12 @@ void BackgroundModel::reset()
 // Getting solution values
 //////////////////////////////////////////////////////////////////////
 
-/* m (in cm^1) as a function of radius (in cm) */
-double BackgroundModel::mOfr( double R_cm )
+/* mu (in cm^1) as a function of radius (in cm) */
+double BackgroundModel::muOfr( double R_cm )
 {
-  assertSplineBuilt("Tried to get m when splines not built.");
+  assertSplineBuilt("Tried to get mu when splines not built.");
 
-  return gsl_spline_eval (spline_m, R_cm, acc.get());
+  return gsl_spline_eval (spline_mu, R_cm, acc.get());
 };
 
 /* nu (in cm^0) as a function of radius (in cm) */
@@ -177,7 +191,7 @@ double BackgroundModel::M() const
 {
   assertSolved("Tried to get M when not solved.");
   
-  return _m[i_max];
+  return _mu[i_max];
 };
 
 std::string BackgroundModel::summary() const
@@ -200,24 +214,30 @@ std::string BackgroundModel::summary() const
 // Initial conditions
 //////////////////////////////////////////////////////////////////////
 // Calculates initial conditions and stores them in
-// the [0] elements of _r, _m, _nu, _p
+// the [0] elements of _r, _mu, _nu, _phi, _psi, _p
 void BackgroundModel::initialConditions()
 {
 
-  const double rhoc = eos.geomepsilonOfgeomP( pc );
-  const double rho2 = 0.;
-  const double p2   = -(2.0/3.0*(rhoc+pc))*M_PI*(rhoc+3.0*pc);
+  const double A_c = conf.A(phic);
+  const double A_c4 = A_c*A_c*A_c*A_c;
+  const double alpha_c = conf.alpha(phic);
+  const double eps_c = eos.geomepsilonOfgeomP( pc );
+  const double mu_3 = 8.*M_PI*A_c4*eps_c;
+  const double nu_2 = 8.*M_PI*A_c4*pc + mu_3/3.;
+  const double psi_1 = 4./3.*M_PI*A_c4*alpha_c*(eps_c-3.*pc);  
+  const double p_2   = -(eps_c+pc)*(0.5*nu_2+alpha_c*psi_1);
 
   // We have to start slightly away from 0
   const double r  = EPSR;
   const double r2 = r*r;
   const double r3 = r2*r;
-  const double r5 = r3*r2;
 
   _r [0]  = r;
-  _p [0]  = pc+p2*r2;
-  _m [0]  = (4.0/3.0)*M_PI*rhoc*r3 + (4.0/5.0)*M_PI*rho2*r5;
-  _nu[0]  = (4.0/3.0)*M_PI*r2*(rhoc + 3.0*pc);
+  _mu[0]  = mu_3*r3/6.;
+  _nu[0]  = 0.5*nu_2*r2;
+  _phi[0] = phic + 0.5*psi_1*r2;
+  _psi[0] = psi_1*r;
+  _p [0]  = pc + 0.5*p_2*r2;
 
 };
 
@@ -232,7 +252,7 @@ void BackgroundModel::solve()
   // Set up the GSL ODE solver
   gsl_odeiv2_system sys = {RHS_0_gsl, // function which computes d/dr of system
                            0,         // Jacobian -- we aren't specifying it
-                           3,         // Number of equations in the system
+                           5,         // Number of equations in the system
                            this};     // params-- pointer to me.
 
 
@@ -247,7 +267,7 @@ void BackgroundModel::solve()
   int i;
   double r;
   const double dr = DR;
-  double y[3];
+  double y[5];
 
   /* Set up initial conditions in [0] elements of storage */
   initialConditions();
@@ -255,9 +275,11 @@ void BackgroundModel::solve()
   /* Set state variables with initial conditions */
   r    = _r [0];
 
-  y[0] = _p [0];
-  y[1] = _m [0];
-  y[2] = _nu[0];
+  y[0] = _mu[0];
+  y[1] = _nu[0];
+  y[2] = _phi[0];
+  y[3] = _psi[0];
+  y[4] = _p [0];
 
   const double p_min = eos.p_min();
 
@@ -273,10 +295,13 @@ void BackgroundModel::solve()
         break;
       }
 
-    _p [i+1] = y[0];
-    _m [i+1] = y[1];
-    _nu[i+1] = y[2];
     _r [i+1] = r;
+
+    _mu[i+1]  = y[0];
+    _nu[i+1]  = y[1];
+    _phi[i+1] = y[2];
+    _psi[i+1] = y[3];
+    _p [i+1]  = y[4];
 
     i_max=i;
 
@@ -285,16 +310,13 @@ void BackgroundModel::solve()
   gsl_odeiv2_driver_free (ode_driver);
 
   /* Surface Values */
-  double m_final = _m[i_max];
   double r_final = r;
-  double nu_final = _nu[i_max];
-
-  /* Normalization Values */
-  double normalization_nu = log(1.0 - 2.0*m_final/r_final) - nu_final; 
-  /* This is such that newnu = oldnu + normaliazation_nu = 1 - 2 M_f/R_f */
-  for(i=0; i<=i_max; i++)
-    _nu[i] += normalization_nu;
-
+  double mu_final = _mu[i_max];
+  
+  // TODO
+  // Compute surface values, save summary quantities like
+  // \phi_0, \alpha_A, \omega_A, m_A
+  
   solved = true;
 
   buildSplines();
@@ -308,21 +330,41 @@ void BackgroundModel::solve()
 // This is what gsl uses as source term for the first order ODE
 int RHS_0_gsl(double r, const double y[], double f[], void *params)
 {
-  // y[0] -- p      (geometric units)
-  // y[1] -- m      (geometric units)
-  // y[2] -- nu     (geometric units)
-  // f[0] -- dp/dr  (geometric units)
-  // f[1] -- dm/dr  (geometric units)
-  // f[2] -- dnu/dr (geometric units)
+  // Compiler should get rid of these variables
+  const double mu  = y[0]; // cm^-1
+  // nu does not appear in any RHS expression
+  // const double nu  = y[1]; // cm^0
+  const double phi = y[2]; // cm^0
+  const double psi = y[3]; // cm^-1
+  const double p   = y[4]; // ? geometric units
+
+  const double psi2 = psi*psi;
+
+  const double rMinusMu = r - mu;
+  const double rMinus2Mu = r - 2.*mu;
 
   const BackgroundModel *myModel = (BackgroundModel*) params;
-  const double eps = myModel->eos.geomepsilonOfgeomP(y[0]);
+
+  const double A = myModel->conf.A(phi);
+  const double A4 = A*A*A*A;
+  const double alpha = myModel->conf.alpha(phi);
+
+  const double eps = myModel->eos.geomepsilonOfgeomP(p);
   const double r2  = r*r;
-  const double r3  = r2*r;
 
-  /* dp/dr = */  f[0] = -((y[0]+eps)*(y[1]+4.0*M_PI*r3*y[0]))/(r*(r-2.0*y[1]));
+  // f[0] -- dmu/dr  (cm^-2)
+  // f[1] -- dnu/dr  (cm^-1)
+  // f[2] -- dphi/dr (cm^-1)
+  // f[3] -- dpsi/dr (cm^-2)
+  // f[4] -- dp/dr   (?)
 
-  /* dm/dr = */  f[1] = 4.0*M_PI*r2*eps;
-  /* dnu/dr = */ f[2] = 2.0*(y[1]+4.0*M_PI*r3*y[0])/(r*(r-2.0*y[1]));
+  /* dm/dr = */   f[0] = 4.*M_PI*r2*A4*eps + 0.5*r*rMinus2Mu*psi2;
+  /* dnu/dr = */  f[1] = 8.*M_PI*r2*A4*p/rMinus2Mu + r*psi2 + 2.*mu/(r*rMinus2Mu);
+  /* dphi/dr = */ f[2] = psi;
+  /* dpsi/dr = */ f[3] = 4.*M_PI*r*A4/rMinus2Mu
+                           * ( alpha*(eps-3.*p) + r*psi*(eps-p) )
+                         - 2.*rMinusMu/(r*rMinus2Mu) * psi;
+  /* dp/dr = */   f[4] = - (eps+p)*( 0.5*f[1] + alpha*psi );
+  
   return GSL_SUCCESS;
 }
