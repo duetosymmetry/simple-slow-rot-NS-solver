@@ -331,12 +331,12 @@ void BackgroundModel::solve()
 int RHS_0_gsl(double r, const double y[], double f[], void *params)
 {
   // Compiler should get rid of these variables
-  const double mu  = y[0]; // cm^-1
+  const double mu  = y[0]; // cm^1
   // nu does not appear in any RHS expression
   // const double nu  = y[1]; // cm^0
   const double phi = y[2]; // cm^0
   const double psi = y[3]; // cm^-1
-  const double p   = y[4]; // ? geometric units
+  const double p   = y[4]; // cm^-2
 
   const double psi2 = psi*psi;
 
@@ -352,11 +352,11 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
   const double eps = myModel->eos.geomepsilonOfgeomP(p);
   const double r2  = r*r;
 
-  // f[0] -- dmu/dr  (cm^-2)
+  // f[0] -- dmu/dr  (cm^0)
   // f[1] -- dnu/dr  (cm^-1)
   // f[2] -- dphi/dr (cm^-1)
   // f[3] -- dpsi/dr (cm^-2)
-  // f[4] -- dp/dr   (?)
+  // f[4] -- dp/dr   (cm^-3)
 
   /* dm/dr = */   f[0] = 4.*M_PI*r2*A4*eps + 0.5*r*rMinus2Mu*psi2;
   /* dnu/dr = */  f[1] = 8.*M_PI*r2*A4*p/rMinus2Mu + r*psi2 + 2.*mu/(r*rMinus2Mu);

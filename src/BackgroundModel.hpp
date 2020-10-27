@@ -32,6 +32,8 @@ class BackgroundModel {
   void solve();
   /* takes pc in units of cm^-2, also resets. */
   void setpc( double new_pc ) { pc = new_pc; reset(); };
+  /* takes phic in units of cm^0, also resets. */
+  void setphic( double new_phic ) { phic = new_phic; reset(); };
 
   /* returns if we currently have a solution for a model */
   bool isSolved() const { return solved; };

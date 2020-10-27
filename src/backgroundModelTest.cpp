@@ -10,6 +10,7 @@
 #include "constants.hpp" /* for G and c */
 #include "ppEOSTable.hpp"
 #include "BackgroundModel.hpp"
+#include "ExpAlpha0Beta0.hpp"
 #include "writeModels.hpp"
 #include <cmath>
 #include <iostream>
@@ -22,7 +23,8 @@ int main(int argc, char *argv[])
 {
 
   ppEOS EoS = findEOS("SLy");
-  double pc;
+  double pc, phic;
+  double alpha_0, beta_0;
   
   ////////////////////////////////////////////////////////////
   // Parse command line and config file
@@ -86,9 +88,16 @@ int main(int argc, char *argv[])
   // Convert to geometric units
   pc *= G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
 
+  phic = args_info.phic_arg;
+
+  alpha_0 = args_info.alpha_arg;
+  beta_0 = args_info.beta_arg;
+
+  ExpAlpha0Beta0 conf(alpha_0, beta_0);
+
   ////////////////////////////////////////////////////////////
   // Create the model and solve
-  BackgroundModel model0( EoS, pc );
+  BackgroundModel model0( EoS, conf, pc, phic );
   
   model0.solve();
   

@@ -18,6 +18,12 @@ args "--file-name=backgroundModelTest-cmdline -C"
 section "Physical parameters"
 
 option "pc"     p "Central pressure in dyne/cm^2" double default="4.039e+34" required
+option "phic"   - "Central scalar phi (dimensionless)" double default="0.0043" required
+
+section "Conformal parameters" sectiondesc="Parameters appearing in the function A(phi)=exp(alpha_0*phi+beta_0*phi^2/2)"
+
+option "alpha"  a "alpha_0 (dimensionless)" double default="0." required
+option "beta"   b "alpha_0 (dimensionless)" double default="-3." required
 
 section "Equation of state"
 

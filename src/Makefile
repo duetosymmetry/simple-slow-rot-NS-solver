@@ -51,8 +51,8 @@ testppEOS_get_rho_low_high: testppEOS_get_rho_low_high.o ppEOS.o
 
 backgroundModelTest: backgroundModelTest.o                           \
                      backgroundModelTest-cmdline.o BackgroundModel.o \
-                     writeModels.o ppEOS.o ppEOSTable.o              \
-                     ModelO1.o ModelO2.o
+										 ExpAlpha0Beta0.o \
+                     writeModels.o ppEOS.o ppEOSTable.o
 
 testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
                     BackgroundModel.o ModelO1.o writeModels.o        \

@@ -10,8 +10,6 @@
 #pragma once
 
 #include "BackgroundModel.hpp"
-#include "ModelO1.hpp"
-#include "ModelO2.hpp"
 
 #include <string>
 #include <ostream>
@@ -21,27 +19,7 @@ void writeBackgroundModel( std::ostream &o,
 void writeBackgroundModel( const std::string & filename,
                            const BackgroundModel &model );
 
-void writeModelO1( std::ostream &o,
-                   const ModelO1 &model );
-void writeModelO1( const std::string & filename,
-                   const ModelO1 &model );
+void writeSummaryHeader( std::ostream &o );
 
-void writeModelO2( std::ostream &o,
-                   ModelO2 &model );
-void writeModelO2( const std::string & filename,
-                   ModelO2 &model );
-
-void writeBG12( std::ostream &o,
-                ModelO2 &model );
-void writeBG12( const std::string & filename,
-                ModelO2 &model );
-
-void writeSummaryHeader1( std::ostream &o );
-void writeSummaryHeader2( std::ostream &o );
 void writeSummaryLine(    std::ostream &o,
-                          const BackgroundModel &model0,
-                          const ModelO1 &model1);
-void writeSummaryLine(    std::ostream &o,
-                          const BackgroundModel &model0,
-                          const ModelO1 &model1,
-                          const ModelO2 &model2 );
+                          const BackgroundModel &model0);
