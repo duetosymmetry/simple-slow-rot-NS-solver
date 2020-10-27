@@ -68,10 +68,18 @@ class BackgroundModel {
   double p  ( unsigned long i ) const { return _p  [i]; };
 
   // Derived quantities
-  // The stellar radius (in cm)
-  double R() const;
+  // The areal radius in Einstein frame (in cm)
+  double R_areal_Einstein() const;
+  // The areal radius in Jordan frame (in cm)
+  double R_areal_Jordan() const;
   // The total mass (in cm)
-  double M() const;
+  double M_ADM() const;
+  // The asymptotic scalar field phi_0 [cm^0]
+  double phi_0() const;
+  // Scaled charge alpha [cm^0]
+  double alpha() const;
+  // Scalar charge omega [cm^1]
+  double omega() const;
 
   // This is public ... it's const so it'll never get modified anyway
 
@@ -97,6 +105,9 @@ protected:
   // Calculates initial conditions and stores them in
   // the [0] elements of _r, _mu, _nu, _phi, _psi, _p
   void initialConditions();
+
+  // Compute the aux surface/body quantities
+  void computeSurfaceBodyQuantities(double r_s, double y_s[]);
 
   //// Storage
 
@@ -127,5 +138,12 @@ protected:
 
   std::unique_ptr<gsl_interp_accel, decltype(&gsl_interp_accel_free)>
     acc;
+
+  // Aux quantities for surface values, charge, phi_0, etc.
+  double nu_prime_s;
+  double _phi_0;
+  double m_ADM;
+  double alpha_body;
+  double omega_body;
 
 };

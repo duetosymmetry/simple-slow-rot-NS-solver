@@ -98,9 +98,10 @@ int main(int argc, char *argv[])
   ////////////////////////////////////////////////////////////
   // Create the model and solve
   BackgroundModel model0( EoS, conf, pc, phic );
-  
+
   model0.solve();
-  
+  std::cout << model0.summary() << std::endl;
+
   writeBackgroundModel( args_info.out_arg, model0 );
 
   return 0;

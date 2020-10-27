@@ -73,7 +73,7 @@ void BackgroundModel::assertSplineBuilt( const std::string & message ) const
 };
 
 void BackgroundModel::safeDeallocSplines()
-{  
+{
 
   if (spline_p)
     { gsl_spline_free(spline_p);   spline_p=nullptr; };
@@ -178,34 +178,71 @@ double BackgroundModel::dnudROfr( double R_cm )
   return gsl_spline_eval_deriv( spline_nu, R_cm, acc.get() );
 };
 
-// The stellar radius (in cm)
-double BackgroundModel::R() const
+// The areal radius in Einstein frame (in cm)
+double BackgroundModel::R_areal_Einstein() const
 {
-  assertSolved("Tried to get R when not solved.");
-  
+  assertSolved("Tried to get R_areal_Einstein when not solved.");
+
   return _r[i_max];
 };
 
+// The areal radius in Jordan fram (in cm)
+double BackgroundModel::R_areal_Jordan() const
+{
+  assertSolved("Tried to get R_areal_Jordan when not solved.");
+
+  const double A_s = conf.A( _phi[i_max] );
+
+  return A_s * _r[i_max];
+};
+
 // The total mass (in cm)
-double BackgroundModel::M() const
+double BackgroundModel::M_ADM() const
 {
   assertSolved("Tried to get M when not solved.");
   
-  return _mu[i_max];
+  return m_ADM;
+};
+
+double BackgroundModel::phi_0() const
+{
+  assertSolved("Tried to get phi_0 when not solved.");
+
+  return _phi_0;
+};
+
+double BackgroundModel::alpha() const
+{
+  assertSolved("Tried to get alpha when not solved.");
+
+  return alpha_body;
+};
+
+double BackgroundModel::omega() const
+{
+  assertSolved("Tried to get omega when not solved.");
+
+  return omega_body;
 };
 
 std::string BackgroundModel::summary() const
 {
   assertSolved("Tried to get summary when not solved.");
 
-  const double m = M(), r = R();
+  const double
+    m = M_ADM(),
+    rE = R_areal_Einstein(),
+    rJ = R_areal_Jordan();
 
   std::ostringstream o;
 
   o << eos.summary()
-    << "; BG summary: M=" << m
-    << ", R=" << r
-    << ", C=" << m/r;
+    << "; BG summary: M_ADM=" << m
+    << ", R_E=" << rE
+    << ", R_J=" << rJ
+    << ", phi_0=" << _phi_0
+    << ", alpha=" << alpha_body
+    << ", omega=" << omega_body;
 
   return o.str();
 };
@@ -232,12 +269,61 @@ void BackgroundModel::initialConditions()
   const double r2 = r*r;
   const double r3 = r2*r;
 
-  _r [0]  = r;
-  _mu[0]  = mu_3*r3/6.;
-  _nu[0]  = 0.5*nu_2*r2;
+  _r  [0] = r;
+  _mu [0] = mu_3*r3/6.;
+  _nu [0] = 0.5*nu_2*r2;
   _phi[0] = phic + 0.5*psi_1*r2;
   _psi[0] = psi_1*r;
-  _p [0]  = pc + 0.5*p_2*r2;
+  _p  [0] = pc + 0.5*p_2*r2;
+
+};
+
+//////////////////////////////////////////////////////////////////////
+// Compute surface/body quantities
+//////////////////////////////////////////////////////////////////////
+// This is called by solve() after the integration stopped at the
+// surface.  It computes the ADM mass, stellar alpha, omega (scalar
+// charge), phi_0 (asymptotic value of scalar field).
+void BackgroundModel::computeSurfaceBodyQuantities(double r_s, double y_s[])
+{
+  // Surface derivatives
+  double f_s[5];
+
+  // We just need \nu' at the surface; reuse the RHS function to get this
+  // Wasteful, but I want to avoid mistakes
+  RHS_0_gsl(r_s, y_s, f_s, this);
+  // now f_s[1] contains nu' at surface
+
+  nu_prime_s = f_s[1];
+
+  // Compiler should get rid of these variables
+  const double mu_s  = y_s[0]; // cm^1
+  // We don't need nu_s here
+  // const double nu_s  = y_s[1]; // cm^0
+  const double phi_s = y_s[2]; // cm^0
+  const double psi_s = y_s[3]; // cm^-1
+  // We don't need p_s here
+  // const double p_s   = y_s[4]; // cm^-2
+
+  // Just before Eq. (8)
+  alpha_body = 2.*psi_s/nu_prime_s;
+
+  // A sqrt that appears in several places
+  const double root = sqrt(nu_prime_s*nu_prime_s + 4.*psi_s*psi_s);
+
+  // The common arctanh expression in Eqs. (8) and (9)
+  const double atanh_val = atanh(root / (nu_prime_s + 2./r_s));
+
+  // Eq. (8)
+  _phi_0 = phi_s + 2.*psi_s/root * atanh_val;
+
+  // Eq. (9)
+  m_ADM = exp( - nu_prime_s/root * atanh_val );
+  m_ADM *= sqrt(1. - 2.*mu_s/r_s);
+  m_ADM *= 0.5*r_s*r_s*nu_prime_s;
+
+  // In the text before Eq. (8)
+  omega_body = - alpha_body * m_ADM;
 
 };
 
@@ -273,13 +359,13 @@ void BackgroundModel::solve()
   initialConditions();
 
   /* Set state variables with initial conditions */
-  r    = _r [0];
+  r    = _r  [0];
 
-  y[0] = _mu[0];
-  y[1] = _nu[0];
+  y[0] = _mu [0];
+  y[1] = _nu [0];
   y[2] = _phi[0];
   y[3] = _psi[0];
-  y[4] = _p [0];
+  y[4] = _p  [0];
 
   const double p_min = eos.p_min();
 
@@ -295,13 +381,13 @@ void BackgroundModel::solve()
         break;
       }
 
-    _r [i+1] = r;
+    _r  [i+1] = r;
 
-    _mu[i+1]  = y[0];
-    _nu[i+1]  = y[1];
+    _mu [i+1] = y[0];
+    _nu [i+1] = y[1];
     _phi[i+1] = y[2];
     _psi[i+1] = y[3];
-    _p [i+1]  = y[4];
+    _p  [i+1] = y[4];
 
     i_max=i;
 
@@ -309,14 +395,8 @@ void BackgroundModel::solve()
 
   gsl_odeiv2_driver_free (ode_driver);
 
-  /* Surface Values */
-  double r_final = r;
-  double mu_final = _mu[i_max];
-  
-  // TODO
-  // Compute surface values, save summary quantities like
-  // \phi_0, \alpha_A, \omega_A, m_A
-  
+  computeSurfaceBodyQuantities(r, y);
+
   solved = true;
 
   buildSplines();
@@ -365,6 +445,6 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
                            * ( alpha*(eps-3.*p) + r*psi*(eps-p) )
                          - 2.*rMinusMu/(r*rMinus2Mu) * psi;
   /* dp/dr = */   f[4] = - (eps+p)*( 0.5*f[1] + alpha*psi );
-  
+
   return GSL_SUCCESS;
 }
