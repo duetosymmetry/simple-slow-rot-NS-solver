@@ -9,6 +9,7 @@
 
 #include "writeModels.hpp"
 #include "BackgroundModel.hpp"
+#include "constants.hpp"
 
 #include <string>
 #include <fstream>
@@ -70,9 +71,9 @@ void writeSummaryHeader( std::ostream &o )
     "# col#  description\n"
     "#    1  central pressure  [cm^-2]\n"
     "#    2  central phi       [cm^0]\n"
-    "#    3  M_ADM             [cm^1]\n"
-    "#    4  R_E               [cm^1]\n"
-    "#    5  R_J               [cm^1]\n"
+    "#    3  M_ADM             [Msun]\n"
+    "#    4  R_E               [km^1]\n"
+    "#    5  R_J               [km^1]\n"
     "#    6  phi_0             [cm^0]\n"
     "#    7  alpha             [cm^0]\n"
     "#    8  omega             [cm^1]\n";
@@ -88,9 +89,10 @@ void writeSummaryLine( std::ostream &o,
   const char s = ' ';
 
   o << model0.p(0) << s
-    << model0.M_ADM() << s
-    << model0.R_areal_Einstein() << s
-    << model0.R_areal_Jordan() << s
+    << model0.phi(0) << s
+    << model0.M_ADM()/GMsun_cm << s
+    << model0.R_areal_Einstein()*1.e-5 << s
+    << model0.R_areal_Jordan()*1.e-5 << s
     << model0.phi_0() << s
     << model0.alpha() << s
     << model0.omega() << s

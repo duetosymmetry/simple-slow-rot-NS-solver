@@ -63,6 +63,7 @@ backgroundModelTest
 testModelO1-single
 testModelO1-multi
 runModelO2-multi
+runPcPhicGrid
 
 # LCS: your local .depends may differ from mine
 .depends
@@ -72,3 +73,7 @@ runModelO2-multi
 
 # LCS: Ignore .dat files unless forcing
 *.dat
+
+# LCS: Ignore ipython notebooks and checkpoints
+*.ipynb
+.ipynb_checkpoints/

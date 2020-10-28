@@ -18,15 +18,18 @@ SRCS = ppEOS.cpp ppEOSTable.cpp util.cpp \
   testppEOS.cpp testppEOS-cmdline.c \
   BackgroundModel.cpp \
   backgroundModelTest.cpp backgroundModelTest-cmdline.c \
-  ModelO1.cpp \
+  ExpAlpha0Beta0.cpp \
   testModelO1-single.cpp testModelO1-single-cmdline.c \
   testModelO1-multi.cpp testModelO1-multi-cmdline.c \
   writeModels.cpp ModelO2.cpp \
   runModelO2-multi-cmdline.c runModelO2-multi.cpp
 
 TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
-  backgroundModelTest testModelO1-single testModelO1-multi        \
-  runModelO2-multi
+  backgroundModelTest \
+  runPcPhicGrid \
+  testModelO1-single testModelO1-multi \
+  runModelO2-multi \
+  $(NULL)
 
 .PHONY: all clean depend
 
@@ -53,6 +56,12 @@ backgroundModelTest: backgroundModelTest.o                           \
                      backgroundModelTest-cmdline.o BackgroundModel.o \
 										 ExpAlpha0Beta0.o \
                      writeModels.o ppEOS.o ppEOSTable.o
+
+runPcPhicGrid: runPcPhicGrid.o                           \
+               runPcPhicGrid-cmdline.o BackgroundModel.o \
+						   ExpAlpha0Beta0.o \
+							 util.o \
+               writeModels.o ppEOS.o ppEOSTable.o
 
 testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
                     BackgroundModel.o ModelO1.o writeModels.o        \
