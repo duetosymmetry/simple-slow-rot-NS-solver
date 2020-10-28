@@ -22,6 +22,9 @@
 // BG_MAX_SIZE, EPSR, DR, EPSABS, EPSREL, P_RATIO
 #include "integMagicNums.hpp"
 
+// For unit conversion
+#include "constants.hpp"
+
 //////////////////////////////////////////////////////////////////////
 // Forward decls
 //////////////////////////////////////////////////////////////////////
@@ -237,12 +240,12 @@ std::string BackgroundModel::summary() const
   std::ostringstream o;
 
   o << eos.summary()
-    << "; BG summary: M_ADM=" << m
-    << ", R_E=" << rE
-    << ", R_J=" << rJ
+    << "; BG summary: M_ADM=" << m/GMsun_cm << "Msun"
+    << ", R_E=" << rE/1.e5 << "km"
+    << ", R_J=" << rJ/1.e5 << "km"
     << ", phi_0=" << _phi_0
     << ", alpha=" << alpha_body
-    << ", omega=" << omega_body;
+    << ", omega=" << omega_body << "cm";
 
   return o.str();
 };
