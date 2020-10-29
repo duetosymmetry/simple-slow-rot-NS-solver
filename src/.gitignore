@@ -64,6 +64,7 @@ testModelO1-single
 testModelO1-multi
 runModelO2-multi
 runPcPhicGrid
+testPhi0Solver
 
 # LCS: your local .depends may differ from mine
 .depends

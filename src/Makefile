@@ -27,6 +27,7 @@ SRCS = ppEOS.cpp ppEOSTable.cpp util.cpp \
 TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
   backgroundModelTest \
   runPcPhicGrid \
+	testPhi0Solver \
   testModelO1-single testModelO1-multi \
   runModelO2-multi \
   $(NULL)
@@ -62,6 +63,13 @@ runPcPhicGrid: runPcPhicGrid.o                           \
 						   ExpAlpha0Beta0.o \
 							 util.o \
                writeModels.o ppEOS.o ppEOSTable.o
+
+testPhi0Solver: testPhi0Solver.o \
+                testPhi0Solver-cmdline.o \
+                BackgroundModel.o \
+								ExpAlpha0Beta0.o \
+                Phi0Solver.o \
+                writeModels.o ppEOS.o ppEOSTable.o
 
 testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
                     BackgroundModel.o ModelO1.o writeModels.o        \
