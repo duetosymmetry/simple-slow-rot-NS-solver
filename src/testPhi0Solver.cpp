@@ -7,6 +7,7 @@
  *
  */
 
+#include "integMagicNums.hpp"
 #include "constants.hpp" /* for G and c */
 #include "ppEOSTable.hpp"
 #include "BackgroundModel.hpp"
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
   // Create the model and solve
 
   BackgroundModel model0( EoS, conf, pc, phi0 );
-  Phi0Solver phi0solver( 0., 1.e-3, 30 );
+  Phi0Solver phi0solver( EPSABS, EPSREL, 30 );
 
   int ret = phi0solver.solve(model0, phi0, phic_min, phic_max);
   std::cerr << "Returned " << ret << " from solver" << std::endl;
