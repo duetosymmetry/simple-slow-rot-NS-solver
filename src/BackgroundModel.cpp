@@ -376,13 +376,13 @@ void BackgroundModel::solve()
   for(i=0; _p[i] > P_RATIO*pc && _p[i] > p_min && i<BG_MAX_SIZE-1; i++)
   {
 
-      int status = gsl_odeiv2_driver_apply (ode_driver, &r, r+dr, y);
+    int status = gsl_odeiv2_driver_apply (ode_driver, &r, r+dr, y);
 
-      if (status != GSL_SUCCESS)
-      {
-        printf ("error, return value=%d\n", status);
-        break;
-      }
+    if (status != GSL_SUCCESS)
+    {
+      std::cerr << "error, return value=" << status << std::endl;
+      break;
+    };
 
     _r  [i+1] = r;
 
@@ -394,11 +394,20 @@ void BackgroundModel::solve()
 
     i_max=i;
 
-  }
+  };
 
   gsl_odeiv2_driver_free (ode_driver);
 
-  computeSurfaceBodyQuantities(r, y);
+  // Use the i_max value, not the i_max+1 value of y
+  double y_s[5] =
+    {_mu [i_max],
+     _nu [i_max],
+     _phi[i_max],
+     _psi[i_max],
+     _p  [i_max]
+    };
+
+  computeSurfaceBodyQuantities(r, y_s);
 
   solved = true;
 
