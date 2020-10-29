@@ -3,7 +3,7 @@ CC=clang
 CXX=clang++
 LD=clang++
 BASEFLAGS=-I$(IDIR) $(shell gsl-config --cflags) -O3 \
-  -Wall -Wno-narrowing
+	-Wall -Wno-narrowing
 # if debugging, comment out this line:
 BASEFLAGS += -DNOASSERT
 
@@ -14,26 +14,25 @@ LDFLAGS  = -lm $(shell gsl-config --libs)
 
 # this should contain all C and C++ source files
 SRCS = ppEOS.cpp ppEOSTable.cpp util.cpp \
-  testppEOS_eps_of_P.cpp testppEOS_get_rho_low_high.cpp \
-  testppEOS.cpp testppEOS-cmdline.c \
-  BackgroundModel.cpp \
-  backgroundModelTest.cpp backgroundModelTest-cmdline.c \
-  ExpAlpha0Beta0.cpp \
+	testppEOS_eps_of_P.cpp testppEOS_get_rho_low_high.cpp \
+	testppEOS.cpp testppEOS-cmdline.c \
+	BackgroundModel.cpp \
+	backgroundModelTest.cpp backgroundModelTest-cmdline.c \
+	ExpAlpha0Beta0.cpp \
 	Phi0Solver.cpp \
-  testModelO1-single.cpp testModelO1-single-cmdline.c \
-  testModelO1-multi.cpp testModelO1-multi-cmdline.c \
-  writeModels.cpp ModelO2.cpp \
-  runModelO2-multi-cmdline.c runModelO2-multi.cpp
+	runPcPhicGrid.cpp \
+	runPhi0Family.cpp \
+	runPcPhi0Grid.cpp \
+	writeModels.cpp \
+	$(NULL)
 
 TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
-  backgroundModelTest \
-  runPcPhicGrid \
+	backgroundModelTest \
+	runPcPhicGrid \
 	testPhi0Solver \
 	runPhi0Family \
-  runPcPhi0Grid \
-  testModelO1-single testModelO1-multi \
-  runModelO2-multi \
-  $(NULL)
+	runPcPhi0Grid \
+	$(NULL)
 
 .PHONY: all clean depend
 
@@ -57,48 +56,36 @@ testppEOS_eps_of_P: testppEOS_eps_of_P.o ppEOS.o
 testppEOS_get_rho_low_high: testppEOS_get_rho_low_high.o ppEOS.o
 
 backgroundModelTest: backgroundModelTest.o                           \
-                     backgroundModelTest-cmdline.o BackgroundModel.o \
+										 backgroundModelTest-cmdline.o BackgroundModel.o \
 										 ExpAlpha0Beta0.o \
-                     writeModels.o ppEOS.o ppEOSTable.o
+										 writeModels.o ppEOS.o ppEOSTable.o
 
 runPcPhicGrid: runPcPhicGrid.o                           \
-               runPcPhicGrid-cmdline.o BackgroundModel.o \
-						   ExpAlpha0Beta0.o \
+							 runPcPhicGrid-cmdline.o BackgroundModel.o \
+							 ExpAlpha0Beta0.o \
 							 util.o \
-               writeModels.o ppEOS.o ppEOSTable.o
+							 writeModels.o ppEOS.o ppEOSTable.o
 
 testPhi0Solver: testPhi0Solver.o \
-                testPhi0Solver-cmdline.o \
-                BackgroundModel.o \
+								testPhi0Solver-cmdline.o \
+								BackgroundModel.o \
 								ExpAlpha0Beta0.o \
-                Phi0Solver.o \
-                writeModels.o ppEOS.o ppEOSTable.o
+								Phi0Solver.o \
+								writeModels.o ppEOS.o ppEOSTable.o
 
 runPhi0Family: runPhi0Family.o \
-               runPhi0Family-cmdline.o \
-               BackgroundModel.o \
+							 runPhi0Family-cmdline.o \
+							 BackgroundModel.o \
 							 ExpAlpha0Beta0.o \
-               Phi0Solver.o \
-               writeModels.o ppEOS.o ppEOSTable.o
+							 Phi0Solver.o \
+							 writeModels.o ppEOS.o ppEOSTable.o
 
 runPcPhi0Grid: runPcPhi0Grid.o                           \
-               runPcPhi0Grid-cmdline.o BackgroundModel.o \
-						   ExpAlpha0Beta0.o \
+							 runPcPhi0Grid-cmdline.o BackgroundModel.o \
+							 ExpAlpha0Beta0.o \
 							 util.o \
-               Phi0Solver.o \
-               writeModels.o ppEOS.o ppEOSTable.o
-
-testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
-                    BackgroundModel.o ModelO1.o writeModels.o        \
-                    ppEOS.o ppEOSTable.o ModelO2.o
-
-testModelO1-multi: testModelO1-multi.o testModelO1-multi-cmdline.o \
-                   BackgroundModel.o ModelO1.o writeModels.o       \
-                   ppEOS.o ppEOSTable.o ModelO2.o
-
-runModelO2-multi: runModelO2-multi.o runModelO2-multi-cmdline.o     \
-                  BackgroundModel.o ModelO1.o writeModels.o ppEOS.o \
-                  ppEOSTable.o ModelO2.o util.o
+							 Phi0Solver.o \
+							 writeModels.o ppEOS.o ppEOSTable.o
 
 clean:
 	rm -f *.o *~ core $(INCDIR)/*~ $(TARGETS)
