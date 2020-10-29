@@ -1,0 +1,71 @@
+#
+# runPcPhi0Grid.ggo
+#
+# The configuration file for command-line options for runPcPhi0grid
+#
+# Author: Leo C. Stein (leo.stein@gmail.com)
+# Date:   Oct. 2020
+#
+
+# Meta
+package "runPcPhi0Grid"
+version "0.1"
+description "Run a grid of models with grid spacing in pc, phi0"
+
+# Optional - arguments to pass to gengetopt
+args "--file-name=runPcPhi0Grid-cmdline -C"
+
+section "Configuration file"
+
+option "conf-file"   C "Configuration file to read" string
+       default="pcPhi0Grid.conf" optional
+
+section "Model parameter space"
+
+option "pc-low"     - "Smallest central pressure [dyne/cm^2]"
+       double default="4.e+34" required
+option "pc-high"    - "Largest  central pressure [dyne/cm^2]"
+       double default="2.e+36" required
+option "n-p"        - "Number of pc values in grid (pressure is log-spaced)"
+       int default="8" optional
+option "phi0-low"   - "Smallest phi0"
+       double default="-0.004" required
+option "phi0-high"  - "Largest phi0"
+       double default="0.004" required
+option "n-phi0"      - "Number of phi0 in grid (linearly spaced)"
+       int default="8" optional
+option "phic-low"  - "Lower search bound for central value of phi (dimensionless)" double default="-0.3" required
+option "phic-high" - "Upper search bound for central value of phi (dimensionless)" double default="0.3" required
+
+section "Conformal parameters" sectiondesc="Parameters appearing in the function A(phi)=exp(alpha_0*phi+beta_0*phi^2/2)"
+
+option "alpha"  a "alpha_0 (dimensionless)" double default="0." required
+option "beta"   b "alpha_0 (dimensionless)" double default="-3." required
+
+section "Equation of state"
+
+defmode "param-fit"    modedesc="Parametrized EoS fit to a numerical model (default)."
+defmode "param-manual" modedesc="Parametrized EoS with manual parameters."
+
+modeoption "eos-name" - "Name of the EoS model." string default="SLy"
+           values="PAL6","SLy","AP1","AP2","AP3","AP4","FPS","WFF1",
+           "WFF2","WFF3","BBB2","BPAL12","ENG","MPA1","MS1","MS2",
+           "MS1b","PS","GS1","GS2","BGN1H1","GNH3","H1","H2","H3",
+           "H4","H5","H6","H7","PCL2","ALF1","ALF2","ALF3","ALF4"
+           mode="param-fit" optional
+
+modeoption "log10p1"  p "The log (base 10) of (p1 in dyne/cm^2)."
+           double default="34.384" mode="param-manual" required
+modeoption "Gamma1"   1 "Power law index Gamma1" double default="3.005"
+           mode="param-manual" required
+modeoption "Gamma2"   2 "Power law index Gamma2" double default="2.988"
+           mode="param-manual" required
+modeoption "Gamma3"   3 "Power law index Gamma3" double default="2.851"
+           mode="param-manual" required
+modeoption "log10rho1" - "The log (base 10) of (rho1 in g/cm^3)."
+           double default="14.7" mode="param-manual" optional
+
+section "File output"
+
+option "out"  o "The file name to output the multiple model summary"
+       string default="phi0-grid-summary.dat" optional

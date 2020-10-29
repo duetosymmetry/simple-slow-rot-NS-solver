@@ -66,6 +66,7 @@ runModelO2-multi
 runPcPhicGrid
 testPhi0Solver
 runPhi0Family
+runPcPhi0Grid
 
 # LCS: your local .depends may differ from mine
 .depends

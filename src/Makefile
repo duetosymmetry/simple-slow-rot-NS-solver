@@ -19,6 +19,7 @@ SRCS = ppEOS.cpp ppEOSTable.cpp util.cpp \
   BackgroundModel.cpp \
   backgroundModelTest.cpp backgroundModelTest-cmdline.c \
   ExpAlpha0Beta0.cpp \
+	Phi0Solver.cpp \
   testModelO1-single.cpp testModelO1-single-cmdline.c \
   testModelO1-multi.cpp testModelO1-multi-cmdline.c \
   writeModels.cpp ModelO2.cpp \
@@ -29,6 +30,7 @@ TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
   runPcPhicGrid \
 	testPhi0Solver \
 	runPhi0Family \
+  runPcPhi0Grid \
   testModelO1-single testModelO1-multi \
   runModelO2-multi \
   $(NULL)
@@ -76,6 +78,13 @@ runPhi0Family: runPhi0Family.o \
                runPhi0Family-cmdline.o \
                BackgroundModel.o \
 							 ExpAlpha0Beta0.o \
+               Phi0Solver.o \
+               writeModels.o ppEOS.o ppEOSTable.o
+
+runPcPhi0Grid: runPcPhi0Grid.o                           \
+               runPcPhi0Grid-cmdline.o BackgroundModel.o \
+						   ExpAlpha0Beta0.o \
+							 util.o \
                Phi0Solver.o \
                writeModels.o ppEOS.o ppEOSTable.o
 
