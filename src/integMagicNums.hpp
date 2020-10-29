@@ -18,5 +18,6 @@
 // Absolute and relative error tolerances
 #define EPSABS 3.e-5
 #define EPSREL 0.0
+#define MAX_ITER 30
 // the pressure contrast to end integration
 #define P_RATIO 1.e-10

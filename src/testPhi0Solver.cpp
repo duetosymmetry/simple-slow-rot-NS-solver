@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
   // Create the model and solve
 
   BackgroundModel model0( EoS, conf, pc, phi0 );
-  Phi0Solver phi0solver( EPSABS, EPSREL, 30 );
+  Phi0Solver phi0solver( EPSABS, EPSREL, MAX_ITER );
 
   int ret = phi0solver.solve(model0, phi0, phic_min, phic_max);
   std::cerr << "Returned " << ret << " from solver" << std::endl;
