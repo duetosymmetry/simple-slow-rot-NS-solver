@@ -28,6 +28,7 @@ TARGETS = testppEOS testppEOS_eps_of_P testppEOS_get_rho_low_high \
   backgroundModelTest \
   runPcPhicGrid \
 	testPhi0Solver \
+	runPhi0Family \
   testModelO1-single testModelO1-multi \
   runModelO2-multi \
   $(NULL)
@@ -70,6 +71,13 @@ testPhi0Solver: testPhi0Solver.o \
 								ExpAlpha0Beta0.o \
                 Phi0Solver.o \
                 writeModels.o ppEOS.o ppEOSTable.o
+
+runPhi0Family: runPhi0Family.o \
+               runPhi0Family-cmdline.o \
+               BackgroundModel.o \
+							 ExpAlpha0Beta0.o \
+               Phi0Solver.o \
+               writeModels.o ppEOS.o ppEOSTable.o
 
 testModelO1-single: testModelO1-single.o testModelO1-single-cmdline.o\
                     BackgroundModel.o ModelO1.o writeModels.o        \
