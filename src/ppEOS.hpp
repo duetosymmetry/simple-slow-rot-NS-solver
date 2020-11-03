@@ -52,6 +52,11 @@ struct ppEOS {
    */
   double pressure(double rho) const;
 
+  /* rest-mass density (in units of g/cm^3) from
+   * pressure (in units of dyne/cm^2)
+   */
+  double rhoOfP(double P) const;
+
   /* energy density (in units of g/cm^3) from
    * a density (in units of g/cm^3)
    */
@@ -66,6 +71,11 @@ struct ppEOS {
    * a pressure (in units of cm^-2)
    */
   double geomepsilonOfgeomP(double geomP) const;
+
+  /* rest-mass density (in units of cm^-2) from
+   * pressure (in units of cm^-2)
+   */
+  double geomrhoOfgeomP(double geomP) const;
 
   /* get rho_low_high
    */

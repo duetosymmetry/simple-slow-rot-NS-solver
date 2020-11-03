@@ -42,6 +42,15 @@ double ppEOS::pressure( double rho ) const
 
 };
 
+double ppEOS::rhoOfP( double P ) const
+{
+  int i=0;
+  while ( (P >= P_trans[i]) && (i<6) ) i++;
+
+  return pow(P / K[i] , 1./Gamma[i]);
+
+};
+
 // Eq. (6)
 double ppEOS::epsilon( double rho ) const
 {
@@ -60,7 +69,7 @@ double ppEOS::epsilonOfP( double P ) const
   int i=0;
   while ( (P >= P_trans[i]) && (i<6) ) i++;
   
-  return (1. + a[i]) * pow( P / K[i], 1/Gamma[i] )
+  return (1. + a[i]) * pow( P / K[i], 1./Gamma[i] )
     + P / c2_cm_s / (Gamma[i] - 1. );
 
 };
@@ -73,6 +82,20 @@ double ppEOS::geomepsilonOfgeomP( double geomP ) const
   geomP /= G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
 
   f = epsilonOfP( geomP );
+  /* convert f from g/cm^3 to cm^-2 */
+  f *= G_cgs/(c_cm_s*c_cm_s);
+
+  return f;
+};
+
+double ppEOS::geomrhoOfgeomP( double geomP ) const
+{
+  double f;
+
+  /* convert p from cm^-2 into dyne/cm^2 */
+  geomP /= G_cgs/(c_cm_s*c_cm_s*c_cm_s*c_cm_s);
+
+  f = rhoOfP( geomP );
   /* convert f from g/cm^3 to cm^-2 */
   f *= G_cgs/(c_cm_s*c_cm_s);
 
