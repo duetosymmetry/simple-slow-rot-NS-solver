@@ -66,14 +66,17 @@ class BackgroundModel {
   double phi( unsigned long i ) const { return _phi[i]; };
   double psi( unsigned long i ) const { return _psi[i]; };
   double p  ( unsigned long i ) const { return _p  [i]; };
+  double mbar( unsigned long i ) const { return _mbar[i]; };
 
   // Derived quantities
   // The areal radius in Einstein frame (in cm)
   double R_areal_Einstein() const;
   // The areal radius in Jordan frame (in cm)
   double R_areal_Jordan() const;
-  // The total mass (in cm)
+  // The ADM mass (in cm)
   double M_ADM() const;
+  // The baryonic mass (in cm)
+  double M_b() const;
   // The asymptotic scalar field phi_0 [cm^0]
   double phi_0() const;
   // Scaled charge alpha [cm^0]
@@ -127,7 +130,8 @@ protected:
     _nu,
     _phi,
     _psi,
-    _p;
+    _p,
+    _mbar;
 
   gsl_spline 
     *spline_mu,

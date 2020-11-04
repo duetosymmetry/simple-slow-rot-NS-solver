@@ -21,14 +21,16 @@ void writeBackgroundModel( std::ostream &o, const BackgroundModel &model )
   const std::string header =
     "# Format for this file:\n"
     "# col#  description\n"
-    "#    1  index of radial point in model\n"
-    "#    2  radius         [cm^1]\n"
-    "#    3  mu(r)          [cm^1]\n"
-    "#    4  nu(r)          [cm^0]\n"
-    "#    5  phi(r)         [cm^0]\n"
-    "#    6  A(phi(r))      [cm^0]\n"
-    "#    7  pressure       [cm^-2]\n"
-    "#    8  energy density [cm^-2]\n";
+    "#   01  index of radial point in model\n"
+    "#   02  radius         [cm^1]\n"
+    "#   03  mu(r)          [cm^1]\n"
+    "#   04  nu(r)          [cm^0]\n"
+    "#   05  phi(r)         [cm^0]\n"
+    "#   06  A(phi(r))      [cm^0]\n"
+    "#   07  pressure       [cm^-2]\n"
+    "#   08  energy density [cm^-2]\n"
+    "#   09  rest mass dens [cm^-2]\n"
+    "#   10  mbar(r)        [cm^1]\n";
 
   const char s = ' ';
 
@@ -44,6 +46,8 @@ void writeBackgroundModel( std::ostream &o, const BackgroundModel &model )
     const double A       = model.conf.A(phi);
     const double geomP   = model.p(i);
     const double geomeps = model.eos.geomepsilonOfgeomP( geomP );
+    const double geomrho = model.eos.geomrhoOfgeomP( geomP );
+    const double mbar    = model.mbar(i);
     o << i << s
       << r << s
       << mu << s
@@ -52,6 +56,8 @@ void writeBackgroundModel( std::ostream &o, const BackgroundModel &model )
       << A << s
       << geomP << s
       << geomeps << s
+      << geomrho << s
+      << mbar << s
       << std::endl;
   };
 };
@@ -72,11 +78,12 @@ void writeSummaryHeader( std::ostream &o )
     "#    1  central pressure  [cm^-2]\n"
     "#    2  central phi       [cm^0]\n"
     "#    3  M_ADM             [Msun]\n"
-    "#    4  R_E               [km^1]\n"
-    "#    5  R_J               [km^1]\n"
-    "#    6  phi_0             [cm^0]\n"
-    "#    7  alpha             [cm^0]\n"
-    "#    8  omega             [cm^1]\n";
+    "#    4  M_b               [Msun]\n"
+    "#    5  R_E               [km^1]\n"
+    "#    6  R_J               [km^1]\n"
+    "#    7  phi_0             [cm^0]\n"
+    "#    8  alpha             [cm^0]\n"
+    "#    9  omega             [cm^1]\n";
 
   o << header;
 
@@ -91,6 +98,7 @@ void writeSummaryLine( std::ostream &o,
   o << model0.p(0) << s
     << model0.phi(0) << s
     << model0.M_ADM()/GMsun_cm << s
+    << model0.M_b()/GMsun_cm << s
     << model0.R_areal_Einstein()*1.e-5 << s
     << model0.R_areal_Jordan()*1.e-5 << s
     << model0.phi_0() << s

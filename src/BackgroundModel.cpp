@@ -44,6 +44,7 @@ BackgroundModel::BackgroundModel( const ppEOS &eos,
     solved(false), splineBuilt(false), i_max(0),
     _r(BG_MAX_SIZE), _mu(BG_MAX_SIZE), _nu(BG_MAX_SIZE),
     _phi(BG_MAX_SIZE), _psi(BG_MAX_SIZE), _p(BG_MAX_SIZE),
+    _mbar(BG_MAX_SIZE),
     spline_mu(nullptr), spline_nu(nullptr),
     spline_phi(nullptr), spline_psi(nullptr), spline_p(nullptr),
     acc(gsl_interp_accel_alloc(), &gsl_interp_accel_free)
@@ -207,6 +208,14 @@ double BackgroundModel::M_ADM() const
   return m_ADM;
 };
 
+// The baryonic mass (in cm)
+double BackgroundModel::M_b() const
+{
+  assertSolved("Tried to get M_b when not solved.");
+
+  return _mbar[i_max];
+};
+
 double BackgroundModel::phi_0() const
 {
   assertSolved("Tried to get phi_0 when not solved.");
@@ -234,6 +243,7 @@ std::string BackgroundModel::summary() const
 
   const double
     m = M_ADM(),
+    m_b = M_b(),
     rE = R_areal_Einstein(),
     rJ = R_areal_Jordan();
 
@@ -241,6 +251,7 @@ std::string BackgroundModel::summary() const
 
   o << eos.summary()
     << "; BG summary: M_ADM=" << m/GMsun_cm << "Msun"
+    << ", M_b=" << m_b/GMsun_cm << "Msun"
     << ", R_E=" << rE/1.e5 << "km"
     << ", R_J=" << rJ/1.e5 << "km"
     << ", phi_0=" << _phi_0
@@ -254,18 +265,21 @@ std::string BackgroundModel::summary() const
 // Initial conditions
 //////////////////////////////////////////////////////////////////////
 // Calculates initial conditions and stores them in
-// the [0] elements of _r, _mu, _nu, _phi, _psi, _p
+// the [0] elements of _r, _mu, _nu, _phi, _psi, _p, _mbar
 void BackgroundModel::initialConditions()
 {
 
   const double A_c = conf.A(phic);
-  const double A_c4 = A_c*A_c*A_c*A_c;
+  const double A_c3 = A_c*A_c*A_c;
+  const double A_c4 = A_c3*A_c;
   const double alpha_c = conf.alpha(phic);
   const double eps_c = eos.geomepsilonOfgeomP( pc );
+  const double rho_c = eos.geomrhoOfgeomP( pc );
   const double mu_3 = 8.*M_PI*A_c4*eps_c;
   const double nu_2 = 8.*M_PI*A_c4*pc + mu_3/3.;
   const double psi_1 = 4./3.*M_PI*A_c4*alpha_c*(eps_c-3.*pc);  
   const double p_2   = -(eps_c+pc)*(0.5*nu_2+alpha_c*psi_1);
+  const double mbar_2= 8.*M_PI*A_c3*rho_c;
 
   // We have to start slightly away from 0
   const double r  = EPSR;
@@ -278,6 +292,7 @@ void BackgroundModel::initialConditions()
   _phi[0] = phic + 0.5*psi_1*r2;
   _psi[0] = psi_1*r;
   _p  [0] = pc + 0.5*p_2*r2;
+  _mbar[0]= 0.5*mbar_2*r2;
 
 };
 
@@ -290,7 +305,7 @@ void BackgroundModel::initialConditions()
 void BackgroundModel::computeSurfaceBodyQuantities(double r_s, double y_s[])
 {
   // Surface derivatives
-  double f_s[5];
+  double f_s[6];
 
   // We just need \nu' at the surface; reuse the RHS function to get this
   // Wasteful, but I want to avoid mistakes
@@ -307,6 +322,8 @@ void BackgroundModel::computeSurfaceBodyQuantities(double r_s, double y_s[])
   const double psi_s = y_s[3]; // cm^-1
   // We don't need p_s here
   // const double p_s   = y_s[4]; // cm^-2
+  // We don't need mbar_s here
+  // const double mbar_s= y_s[5]; // cm^1
 
   // Just before Eq. (8)
   alpha_body = 2.*psi_s/nu_prime_s;
@@ -341,7 +358,7 @@ void BackgroundModel::solve()
   // Set up the GSL ODE solver
   gsl_odeiv2_system sys = {RHS_0_gsl, // function which computes d/dr of system
                            0,         // Jacobian -- we aren't specifying it
-                           5,         // Number of equations in the system
+                           6,         // Number of equations in the system
                            this};     // params-- pointer to me.
 
 
@@ -356,7 +373,7 @@ void BackgroundModel::solve()
   int i;
   double r;
   const double dr = DR;
-  double y[5];
+  double y[6];
 
   /* Set up initial conditions in [0] elements of storage */
   initialConditions();
@@ -369,6 +386,7 @@ void BackgroundModel::solve()
   y[2] = _phi[0];
   y[3] = _psi[0];
   y[4] = _p  [0];
+  y[5] = _mbar[0];
 
   const double p_min = eos.p_min();
 
@@ -391,6 +409,7 @@ void BackgroundModel::solve()
     _phi[i+1] = y[2];
     _psi[i+1] = y[3];
     _p  [i+1] = y[4];
+    _mbar[i+1]= y[5];
 
     i_max=i;
 
@@ -399,12 +418,13 @@ void BackgroundModel::solve()
   gsl_odeiv2_driver_free (ode_driver);
 
   // Use the i_max value, not the i_max+1 value of y
-  double y_s[5] =
+  double y_s[6] =
     {_mu [i_max],
      _nu [i_max],
      _phi[i_max],
      _psi[i_max],
-     _p  [i_max]
+     _p  [i_max],
+     _mbar[i_max]
     };
 
   computeSurfaceBodyQuantities(r, y_s);
@@ -429,6 +449,8 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
   const double phi = y[2]; // cm^0
   const double psi = y[3]; // cm^-1
   const double p   = y[4]; // cm^-2
+  // mbar does not appear in any RHS expression
+  //const double mbar= y[5]; // cm^1
 
   const double psi2 = psi*psi;
 
@@ -438,10 +460,12 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
   const BackgroundModel *myModel = (BackgroundModel*) params;
 
   const double A = myModel->conf.A(phi);
-  const double A4 = A*A*A*A;
+  const double A3 = A*A*A;
+  const double A4 = A3*A;
   const double alpha = myModel->conf.alpha(phi);
 
   const double eps = myModel->eos.geomepsilonOfgeomP(p);
+  const double rho = myModel->eos.geomrhoOfgeomP(p);
   const double r2  = r*r;
 
   // f[0] -- dmu/dr  (cm^0)
@@ -449,6 +473,7 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
   // f[2] -- dphi/dr (cm^-1)
   // f[3] -- dpsi/dr (cm^-2)
   // f[4] -- dp/dr   (cm^-3)
+  // f[5] -- dmbar/dr(cm^0)
 
   /* dm/dr = */   f[0] = 4.*M_PI*r2*A4*eps + 0.5*r*rMinus2Mu*psi2;
   /* dnu/dr = */  f[1] = 8.*M_PI*r2*A4*p/rMinus2Mu + r*psi2 + 2.*mu/(r*rMinus2Mu);
@@ -457,6 +482,7 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
                            * ( alpha*(eps-3.*p) + r*psi*(eps-p) )
                          - 2.*rMinusMu/(r*rMinus2Mu) * psi;
   /* dp/dr = */   f[4] = - (eps+p)*( 0.5*f[1] + alpha*psi );
+  /* dmbar/dr = */f[5] = 4.*M_PI*r2*A3*rho/sqrt(1.-2.*mu/r);
 
   return GSL_SUCCESS;
 }
