@@ -152,7 +152,7 @@ double BackgroundModel::pOfr( double R_cm )
 double BackgroundModel::rhoOfr( double R_cm )
 {
 
-  return eos.geomepsilonOfgeomP( p(R_cm) );
+  return eos.geomepsilonOfgeomP( pOfr(R_cm) );
 
 };
 
