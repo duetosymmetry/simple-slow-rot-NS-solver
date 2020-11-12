@@ -396,6 +396,11 @@ void BackgroundModel::solve()
 
     int status = gsl_odeiv2_driver_apply (ode_driver, &r, r+dr, y);
 
+    if (status == GSL_EBADFUNC) {
+      // sentinel value that means we crossed the surface on this attempted step
+      break;
+    };
+
     if (status != GSL_SUCCESS)
     {
       std::cerr << "error, return value=" << status << std::endl;
@@ -451,6 +456,12 @@ int RHS_0_gsl(double r, const double y[], double f[], void *params)
   const double p   = y[4]; // cm^-2
   // mbar does not appear in any RHS expression
   //const double mbar= y[5]; // cm^1
+
+  if (p<0) {
+    // We crossed the surface of the NS
+    // sentinel value
+    return GSL_EBADFUNC;
+  };
 
   const double psi2 = psi*psi;
 
